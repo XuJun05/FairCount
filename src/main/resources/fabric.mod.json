@@ -12,7 +12,7 @@
 		"sources": "https://github.com/XuJun05/FairCount",
         "issues": "https://github.com/XuJun05/FairCount/issues"
 	},
-	"license": "XuJun05's License",
+	"license": "LGPL-3.0-only",
 	"icon": "assets/faircount/icon.png",
 	"environment": "*",
 	"entrypoints": {
@@ -32,7 +32,6 @@
     "custom": {
       "modmenu": {
         "links": {
-          "LICENSE": "https://xujun.gay/license.html",
           "DISCORD": "https://discord.gg/faSR5NHecV"
         }
       }

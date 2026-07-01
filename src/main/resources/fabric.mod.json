@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "faircount",
+	"version": "${version}",
+	"name": "FairCount",
+	"description": "A lightweight, open-source anti-cheat that prevents hackers by verifying client mod counts and IDs.",
+	"authors": [
+		"XuJun05"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "XuJun05's License",
+	"icon": "assets/faircount/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"gay.xujun05.fc.FairCount"
+		],
+		"client": [
+			"gay.xujun05.fc.client.FairCountClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	},
+    "custom": {
+      "modmenu": {
+        "links": {
+          "LICENSE": "xujun.gay/license.htm"
+        }
+      }
+    }
+}

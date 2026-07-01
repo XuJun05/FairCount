@@ -32,7 +32,8 @@
     "custom": {
       "modmenu": {
         "links": {
-          "LICENSE": "xujun.gay/license.html"
+          "LICENSE": "https://xujun.gay/license.html",
+          "DISCORD": "https://discord.gg/faSR5NHecV"
         }
       }
     }

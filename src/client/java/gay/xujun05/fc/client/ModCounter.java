@@ -28,7 +28,7 @@ public class ModCounter {
             }
             else if (origin.getKind() == ModOrigin.Kind.NESTED) {
                 nestedCount++;
-                System.out.println("[FairCount] 内蔵Mod（JiJ）を検知: " + modId);
+                System.out.println("[FairCount] Detected nested mod (JiJ): " + modId);
             }
         }
 
@@ -43,9 +43,9 @@ public class ModCounter {
 
     public void printSummary() {
         System.out.println("=========================================");
-        System.out.println("[FairCount] ユーザーの純粋なJAR数 (PATH): " + pureJarCount);
-        System.out.println("[FairCount] 内蔵Modの数 (NESTED): " + nestedModCount);
-        System.out.println("[FairCount] ロードされた全Mod IDの数: " + detectedModIds.size());
+        System.out.println("[FairCount] User's pure JAR count (PATH): " + pureJarCount);
+        System.out.println("[FairCount] Nested mod count (NESTED): " + nestedModCount);
+        System.out.println("[FairCount] Total loaded Mod IDs count: " + detectedModIds.size());
         System.out.println("=========================================");
     }
 }

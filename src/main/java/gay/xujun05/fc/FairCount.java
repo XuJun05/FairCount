@@ -41,21 +41,21 @@ public class FairCount implements ModInitializer {
             extraMods.removeIf(id -> id.startsWith("fabric-"));
 
             LOGGER.info("=========================================");
-            LOGGER.info("[FairCount] プレイヤー [{}] のMod検問結果", playerName);
-            LOGGER.info("[FairCount] 純粋なJAR数: {} | 内蔵Mod数: {}", pureJar, nested);
-            LOGGER.info("[FairCount] 許可されていないMod: {}", extraMods.size());
+            LOGGER.info("[FairCount] Mod inspection results for player [{}]", playerName);
+            LOGGER.info("[FairCount] Pure JARs: {} | Nested Mods: {}", pureJar, nested);
+            LOGGER.info("[FairCount] Unallowed mods: {}", extraMods.size());
 
             if (extraMods.isEmpty()) {
-                LOGGER.info("[FairCount] 余分なModは検出されませんでした。安全です。");
+                LOGGER.info("[FairCount] No extra mods detected. Safe.");
                 VERIFIED_PLAYERS.add(playerUuid);
             } else {
-                LOGGER.warn("[FairCount] 許可されていないModを検出: {}", extraMods);
+                LOGGER.warn("[FairCount] Detected unallowed mods: {}", extraMods);
 
                 LOGGER.info("=========================================");
 
                 server.execute(() -> {
                     player.connection.disconnect(Component.literal(
-                            "§c[FairCount]\n許可されていない外部Mod（" + extraMods + "）が検出されたためキックされました。"
+                            "§c[FairCount]\nYou were kicked for having unallowed external mods: " + extraMods
                     ));
                 });
                 return;
@@ -72,7 +72,7 @@ public class FairCount implements ModInitializer {
 
             new Thread(() -> {
                 try {
-                    Thread.sleep(3000); // 3秒（3000ミリ秒）待機
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -80,11 +80,11 @@ public class FairCount implements ModInitializer {
                 server.execute(() -> {
                     if (server.getPlayerList().getPlayer(playerUuid) != null && !VERIFIED_PLAYERS.contains(playerUuid)) {
                         player.connection.disconnect(Component.literal(
-                                "§c[FairCount]\nこのサーバーへの参加にはFairCountの導入が必要です。\n" +
-                                        "Modを導入してから再接続してください。"
+                                "§c[FairCount]\nYou must install FairCount to join this server.\n" +
+                                        "Please install the mod and reconnect."
                         ));
                         LOGGER.info("=========================================");
-                        LOGGER.warn("[FairCount] プレイヤー {} はパケットを送信しなかったため、未導入とみなしてキックしました。", playerName);
+                        LOGGER.warn("[FairCount] Player {} was kicked for not sending the packet, assuming mod is not installed.", playerName);
                         LOGGER.info("=========================================");
                     }
                 });

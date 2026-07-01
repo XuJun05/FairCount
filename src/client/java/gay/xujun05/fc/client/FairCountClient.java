@@ -22,7 +22,7 @@ public class FairCountClient implements ClientModInitializer {
 
             ClientPlayNetworking.send(packet);
 
-            System.out.println("[FairCount] サーバーに接続しました。Mod数データを送信しました！");
+            System.out.println("[FairCount] Connected to server. Sent mod count data!");
         });
     }
 }

@@ -20,7 +20,6 @@ public class Config {
             "fabricloader",
             "faircount",
             "fabric-api",
-            "authme",
             "mixinextras"
     );
 
@@ -33,9 +32,9 @@ public class Config {
                 for (String modId : DEFAULT_MODS) {
                     writer.write(modId + "\n");
                 }
-                LOGGER.info("[FairCount] 初期コンフィグファイルを作成しました: {}", configFile.getName());
+                LOGGER.info("[FairCount] Created initial config file: {}", configFile.getName());
             } catch (IOException e) {
-                LOGGER.error("[FairCount] コンフィグファイルの作成に失敗しました", e);
+                LOGGER.error("[FairCount] Failed to create config file", e);
             }
         }
 
@@ -50,9 +49,9 @@ public class Config {
                         ALLOWED_MODS.add(line);
                     }
                 }
-                LOGGER.info("[FairCount] コンフィグから {} 個の許可Modを読み込みました。", ALLOWED_MODS.size());
+                LOGGER.info("[FairCount] Loaded {} allowed mods from config.", ALLOWED_MODS.size());
             } catch (IOException e) {
-                LOGGER.error("[FairCount] コンフィグファイルの読み込みに失敗しました。デフォルト値を使用します。", e);
+                LOGGER.error("[FairCount] Failed to load config file. Using default values.", e);
                 ALLOWED_MODS.addAll(DEFAULT_MODS);
             }
         } else {

@@ -8,8 +8,9 @@
 		"XuJun05"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://www.planetminecraft.com/mod/faircount/",
+		"sources": "https://github.com/XuJun05/FairCount",
+        "issues": "https://github.com/XuJun05/FairCount/issues"
 	},
 	"license": "XuJun05's License",
 	"icon": "assets/faircount/icon.png",
@@ -31,7 +32,7 @@
     "custom": {
       "modmenu": {
         "links": {
-          "LICENSE": "xujun.gay/license.htm"
+          "LICENSE": "xujun.gay/license.html"
         }
       }
     }

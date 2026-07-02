@@ -73,7 +73,6 @@ public class Config {
                 loadOldFormat();
             }
         } else {
-            // Try migrating from old single-file config
             File oldConfig = FabricLoader.getInstance().getConfigDir().resolve("faircount_whitelist.json").toFile();
             if (oldConfig.exists()) {
                 migrateOldConfig(oldConfig);

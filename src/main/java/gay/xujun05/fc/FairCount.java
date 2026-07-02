@@ -70,8 +70,8 @@ public class FairCount implements ModInitializer {
                 LOGGER.info("=========================================");
 
                 server.execute(() -> {
-                    player.connection.disconnect(Component.literal(
-                            "§c[FairCount]\nYou were kicked for having unallowed external mods: " + extraMods
+                    player.connection.disconnect(Component.translatable(
+                            "faircount.kick.unallowed_mods", extraMods.toString()
                     ));
                 });
                 return;
@@ -101,9 +101,8 @@ public class FairCount implements ModInitializer {
                             LOGGER.info("[FairCount] Player {} ({}) bypassed timeout kick (Ignored: {}, OP: {}).", playerName, playerUuid, isIgnored, isOp);
                             return;
                         }
-                        player.connection.disconnect(Component.literal(
-                                "§c[FairCount]\nYou must install FairCount to join this server.\n" +
-                                        "Please install the mod and reconnect."
+                        player.connection.disconnect(Component.translatable(
+                                "faircount.kick.missing_mod"
                         ));
                         LOGGER.info("=========================================");
                         LOGGER.warn("[FairCount] Player {} was kicked for not sending the packet, assuming mod is not installed.", playerName);

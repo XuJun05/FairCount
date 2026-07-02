@@ -1,0 +1,21 @@
+{
+  "faircount.kick.unallowed_mods": "§c[FairCount]\n許可されていない外部Modが検出されたためキックされました: %s",
+  "faircount.kick.missing_mod": "§c[FairCount]\nこのサーバーに参加するにはFairCountをインストールする必要があります。\nModをインストールして再接続してください。",
+  "faircount.command.mod.add.success": "§a[FairCount] ホワイトリストにModを追加しました: %s",
+  "faircount.command.mod.add.fail": "§c[FairCount] そのModは既にホワイトリストに存在します: %s",
+  "faircount.command.mod.remove.success": "§a[FairCount] ホワイトリストからModを削除しました: %s",
+  "faircount.command.mod.remove.fail": "§c[FairCount] そのModはホワイトリストに存在しません: %s",
+  "faircount.command.mod.add_all.success": "§a[FairCount] %s 個のクライアントModをホワイトリストに追加しました。",
+  "faircount.command.mod.add_all.fail": "§c[FairCount] 追加できる新しいクライアントModがありません。プレイヤーが接続しているか確認してください。",
+  "faircount.command.mod.remove_all.success": "§a[FairCount] ホワイトリストから全てのMod (%s個) を削除しました。",
+  "faircount.command.mod.list.empty": "§e[FairCount] ホワイトリストは空です。",
+  "faircount.command.mod.list.header": "§e[FairCount] 許可されているMod (%s):",
+  "faircount.command.list.item": "§7  - %s",
+  "faircount.command.player.not_found": "§c[FairCount] プレイヤーが見つかりません: %s。UUIDかオンラインのプレイヤー名を指定してください。",
+  "faircount.command.player.add.success": "§a[FairCount] 除外リストにプレイヤーを追加しました: %s",
+  "faircount.command.player.add.fail": "§c[FairCount] そのプレイヤーは既に除外リストに存在します: %s",
+  "faircount.command.player.remove.success": "§a[FairCount] 除外リストからプレイヤーを削除しました: %s",
+  "faircount.command.player.remove.fail": "§c[FairCount] そのプレイヤーは除外リストに存在しません: %s",
+  "faircount.command.player.list.empty": "§e[FairCount] 除外リストは空です。",
+  "faircount.command.player.list.header": "§e[FairCount] 除外されているプレイヤー (%s):"
+}

@@ -1,0 +1,21 @@
+{
+  "faircount.kick.unallowed_mods": "§c[FairCount]\n你因为安装了不被允许的外部Mod而被踢出：%s",
+  "faircount.kick.missing_mod": "§c[FairCount]\n你必须安装FairCount才能加入此服务器。\n请安装该Mod后重新连接。",
+  "faircount.command.mod.add.success": "§a[FairCount] 已将Mod添加到白名单：%s",
+  "faircount.command.mod.add.fail": "§c[FairCount] 该Mod已存在于白名单中：%s",
+  "faircount.command.mod.remove.success": "§a[FairCount] 已从白名单中移除Mod：%s",
+  "faircount.command.mod.remove.fail": "§c[FairCount] 该Mod不存在于白名单中：%s",
+  "faircount.command.mod.add_all.success": "§a[FairCount] 已将 %s 个客户端Mod添加到白名单。",
+  "faircount.command.mod.add_all.fail": "§c[FairCount] 没有可添加的新客户端Mod。请确保有玩家在线。",
+  "faircount.command.mod.remove_all.success": "§a[FairCount] 已从白名单中移除所有 %s 个Mod。",
+  "faircount.command.mod.list.empty": "§e[FairCount] 白名单为空。",
+  "faircount.command.mod.list.header": "§e[FairCount] 允许的Mod (%s)：",
+  "faircount.command.list.item": "§7  - %s",
+  "faircount.command.player.not_found": "§c[FairCount] 找不到玩家：%s。请使用UUID或在线玩家名称。",
+  "faircount.command.player.add.success": "§a[FairCount] 已将玩家添加到忽略列表：%s",
+  "faircount.command.player.add.fail": "§c[FairCount] 该玩家已在忽略列表中：%s",
+  "faircount.command.player.remove.success": "§a[FairCount] 已从忽略列表中移除玩家：%s",
+  "faircount.command.player.remove.fail": "§c[FairCount] 该玩家不在忽略列表中：%s",
+  "faircount.command.player.list.empty": "§e[FairCount] 忽略列表为空。",
+  "faircount.command.player.list.header": "§e[FairCount] 被忽略的玩家 (%s)："
+}

@@ -1,0 +1,21 @@
+{
+  "faircount.kick.unallowed_mods": "§c[FairCount]\nYou were kicked for having unallowed external mods: %s",
+  "faircount.kick.missing_mod": "§c[FairCount]\nYou must install FairCount to join this server.\nPlease install the mod and reconnect.",
+  "faircount.command.mod.add.success": "§a[FairCount] Added mod to whitelist: %s",
+  "faircount.command.mod.add.fail": "§c[FairCount] Mod is already in whitelist: %s",
+  "faircount.command.mod.remove.success": "§a[FairCount] Removed mod from whitelist: %s",
+  "faircount.command.mod.remove.fail": "§c[FairCount] Mod is not in whitelist: %s",
+  "faircount.command.mod.add_all.success": "§a[FairCount] Added %s client mods to whitelist.",
+  "faircount.command.mod.add_all.fail": "§c[FairCount] No new client mods to add. Make sure players are connected.",
+  "faircount.command.mod.remove_all.success": "§a[FairCount] Removed all %s mods from whitelist.",
+  "faircount.command.mod.list.empty": "§e[FairCount] Whitelist is empty.",
+  "faircount.command.mod.list.header": "§e[FairCount] Allowed mods (%s):",
+  "faircount.command.list.item": "§7  - %s",
+  "faircount.command.player.not_found": "§c[FairCount] Player not found: %s. Use UUID or an online player name.",
+  "faircount.command.player.add.success": "§a[FairCount] Added player to ignored list: %s",
+  "faircount.command.player.add.fail": "§c[FairCount] Player is already ignored: %s",
+  "faircount.command.player.remove.success": "§a[FairCount] Removed player from ignored list: %s",
+  "faircount.command.player.remove.fail": "§c[FairCount] Player is not in ignored list: %s",
+  "faircount.command.player.list.empty": "§e[FairCount] Ignored player list is empty.",
+  "faircount.command.player.list.header": "§e[FairCount] Ignored players (%s):"
+}

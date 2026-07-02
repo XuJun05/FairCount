@@ -67,10 +67,10 @@ public class FairCountCommand {
     private static int modAdd(CommandContext<CommandSourceStack> context) {
         String modId = StringArgumentType.getString(context, "mod_id");
         if (Config.addMod(modId)) {
-            context.getSource().sendSuccess(() -> Component.literal("§a[FairCount] Added mod to whitelist: " + modId), true);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.add.success", modId), true);
             return 1;
         } else {
-            context.getSource().sendFailure(Component.literal("§c[FairCount] Mod is already in whitelist: " + modId));
+            context.getSource().sendFailure(Component.translatable("faircount.command.mod.add.fail", modId));
             return 0;
         }
     }
@@ -78,10 +78,10 @@ public class FairCountCommand {
     private static int modRemove(CommandContext<CommandSourceStack> context) {
         String modId = StringArgumentType.getString(context, "mod_id");
         if (Config.removeMod(modId)) {
-            context.getSource().sendSuccess(() -> Component.literal("§a[FairCount] Removed mod from whitelist: " + modId), true);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.remove.success", modId), true);
             return 1;
         } else {
-            context.getSource().sendFailure(Component.literal("§c[FairCount] Mod is not in whitelist: " + modId));
+            context.getSource().sendFailure(Component.translatable("faircount.command.mod.remove.fail", modId));
             return 0;
         }
     }
@@ -89,27 +89,27 @@ public class FairCountCommand {
     private static int modAddAll(CommandContext<CommandSourceStack> context) {
         int added = Config.addAllClientMods();
         if (added > 0) {
-            context.getSource().sendSuccess(() -> Component.literal("§a[FairCount] Added " + added + " client mods to whitelist."), true);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.add_all.success", added), true);
         } else {
-            context.getSource().sendFailure(Component.literal("§c[FairCount] No new client mods to add. Make sure players are connected."));
+            context.getSource().sendFailure(Component.translatable("faircount.command.mod.add_all.fail"));
         }
         return added > 0 ? added : 1;
     }
 
     private static int modRemoveAll(CommandContext<CommandSourceStack> context) {
         int removed = Config.removeAllMods();
-        context.getSource().sendSuccess(() -> Component.literal("§a[FairCount] Removed all " + removed + " mods from whitelist."), true);
+        context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.remove_all.success", removed), true);
         return 1;
     }
 
     private static int modList(CommandContext<CommandSourceStack> context) {
         List<String> mods = Config.getAllowedMods();
         if (mods.isEmpty()) {
-            context.getSource().sendSuccess(() -> Component.literal("§e[FairCount] Whitelist is empty."), false);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.list.empty"), false);
         } else {
-            context.getSource().sendSuccess(() -> Component.literal("§e[FairCount] Allowed mods (" + mods.size() + "):"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.list.header", mods.size()), false);
             for (String mod : mods) {
-                context.getSource().sendSuccess(() -> Component.literal("§7  - " + mod), false);
+                context.getSource().sendSuccess(() -> Component.translatable("faircount.command.list.item", mod), false);
             }
         }
         return 1;
@@ -138,16 +138,16 @@ public class FairCountCommand {
         String uuid = resolvePlayerUuid(context, input);
 
         if (uuid == null) {
-            context.getSource().sendFailure(Component.literal("§c[FairCount] Player not found: " + input + ". Use UUID or an online player name."));
+            context.getSource().sendFailure(Component.translatable("faircount.command.player.not_found", input));
             return 0;
         }
 
         if (Config.addPlayer(uuid)) {
             String displayText = input.equals(uuid) ? uuid : input + " (" + uuid + ")";
-            context.getSource().sendSuccess(() -> Component.literal("§a[FairCount] Added player to ignored list: " + displayText), true);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.player.add.success", displayText), true);
             return 1;
         } else {
-            context.getSource().sendFailure(Component.literal("§c[FairCount] Player is already ignored: " + uuid));
+            context.getSource().sendFailure(Component.translatable("faircount.command.player.add.fail", uuid));
             return 0;
         }
     }
@@ -157,16 +157,16 @@ public class FairCountCommand {
         String uuid = resolvePlayerUuid(context, input);
 
         if (uuid == null) {
-            context.getSource().sendFailure(Component.literal("§c[FairCount] Player not found: " + input + ". Use UUID or an online player name."));
+            context.getSource().sendFailure(Component.translatable("faircount.command.player.not_found", input));
             return 0;
         }
 
         if (Config.removePlayer(uuid)) {
             String displayText = input.equals(uuid) ? uuid : input + " (" + uuid + ")";
-            context.getSource().sendSuccess(() -> Component.literal("§a[FairCount] Removed player from ignored list: " + displayText), true);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.player.remove.success", displayText), true);
             return 1;
         } else {
-            context.getSource().sendFailure(Component.literal("§c[FairCount] Player is not in ignored list: " + uuid));
+            context.getSource().sendFailure(Component.translatable("faircount.command.player.remove.fail", uuid));
             return 0;
         }
     }
@@ -174,14 +174,14 @@ public class FairCountCommand {
     private static int playerList(CommandContext<CommandSourceStack> context) {
         List<String> players = Config.getIgnoredPlayers();
         if (players.isEmpty()) {
-            context.getSource().sendSuccess(() -> Component.literal("§e[FairCount] Ignored player list is empty."), false);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.player.list.empty"), false);
         } else {
-            context.getSource().sendSuccess(() -> Component.literal("§e[FairCount] Ignored players (" + players.size() + "):"), false);
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.player.list.header", players.size()), false);
             for (String uuid : players) {
                 // Try to resolve UUID to player name for display
                 ServerPlayer onlinePlayer = context.getSource().getServer().getPlayerList().getPlayer(java.util.UUID.fromString(uuid));
                 String display = onlinePlayer != null ? onlinePlayer.getName().getString() + " (" + uuid + ")" : uuid;
-                context.getSource().sendSuccess(() -> Component.literal("§7  - " + display), false);
+                context.getSource().sendSuccess(() -> Component.translatable("faircount.command.list.item", display), false);
             }
         }
         return 1;

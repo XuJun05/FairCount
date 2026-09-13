@@ -3,7 +3,6 @@ package gay.xujun05.fc.command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import gay.xujun05.fc.Config;
-import gay.xujun05.fc.FairCount;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -12,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 
 import java.util.List;
+import java.util.Map;
 
 public class FairCountCommand {
     public static void register() {
@@ -27,6 +27,9 @@ public class FairCountCommand {
                                     )
                                     .then(Commands.argument("mod_id", StringArgumentType.string())
                                             .executes(FairCountCommand::modAdd)
+                                            .then(Commands.argument("sha256", StringArgumentType.string())
+                                                    .executes(FairCountCommand::modAddWithHash)
+                                            )
                                     )
                             )
                             .then(Commands.literal("remove")
@@ -35,6 +38,9 @@ public class FairCountCommand {
                                     )
                                     .then(Commands.argument("mod_id", StringArgumentType.string())
                                             .executes(FairCountCommand::modRemove)
+                                            .then(Commands.argument("sha256", StringArgumentType.string())
+                                                    .executes(FairCountCommand::modRemoveWithHash)
+                                            )
                                     )
                             )
                             .then(Commands.literal("list")
@@ -58,6 +64,35 @@ public class FairCountCommand {
                                     .executes(FairCountCommand::playerList)
                             )
                     )
+
+                    // /faircount pack ...
+                    .then(Commands.literal("pack")
+                            .then(Commands.literal("add")
+                                    .then(Commands.literal("all")
+                                            .executes(FairCountCommand::packAddAll)
+                                    )
+                                    .then(Commands.argument("pack_name", StringArgumentType.string())
+                                            .executes(FairCountCommand::packAdd)
+                                            .then(Commands.argument("sha256", StringArgumentType.string())
+                                                    .executes(FairCountCommand::packAddWithHash)
+                                            )
+                                    )
+                            )
+                            .then(Commands.literal("remove")
+                                    .then(Commands.literal("all")
+                                            .executes(FairCountCommand::packRemoveAll)
+                                    )
+                                    .then(Commands.argument("pack_name", StringArgumentType.string())
+                                            .executes(FairCountCommand::packRemove)
+                                            .then(Commands.argument("sha256", StringArgumentType.string())
+                                                    .executes(FairCountCommand::packRemoveWithHash)
+                                            )
+                                    )
+                            )
+                            .then(Commands.literal("list")
+                                    .executes(FairCountCommand::packList)
+                            )
+                    )
             );
         });
     }
@@ -75,6 +110,19 @@ public class FairCountCommand {
         }
     }
 
+    private static int modAddWithHash(CommandContext<CommandSourceStack> context) {
+        String modId = StringArgumentType.getString(context, "mod_id");
+        String hash = StringArgumentType.getString(context, "sha256").toLowerCase();
+        if (Config.addMod(modId, hash)) {
+            String shortHash = hash.substring(0, Math.min(8, hash.length())) + "...";
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.add_hash.success", modId, shortHash), true);
+            return 1;
+        } else {
+            context.getSource().sendFailure(Component.translatable("faircount.command.mod.add_hash.fail", modId));
+            return 0;
+        }
+    }
+
     private static int modRemove(CommandContext<CommandSourceStack> context) {
         String modId = StringArgumentType.getString(context, "mod_id");
         if (Config.removeMod(modId)) {
@@ -82,6 +130,19 @@ public class FairCountCommand {
             return 1;
         } else {
             context.getSource().sendFailure(Component.translatable("faircount.command.mod.remove.fail", modId));
+            return 0;
+        }
+    }
+
+    private static int modRemoveWithHash(CommandContext<CommandSourceStack> context) {
+        String modId = StringArgumentType.getString(context, "mod_id");
+        String hash = StringArgumentType.getString(context, "sha256").toLowerCase();
+        if (Config.removeModHash(modId, hash)) {
+            String shortHash = hash.substring(0, Math.min(8, hash.length())) + "...";
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.remove_hash.success", modId, shortHash), true);
+            return 1;
+        } else {
+            context.getSource().sendFailure(Component.translatable("faircount.command.mod.remove_hash.fail", modId));
             return 0;
         }
     }
@@ -103,13 +164,16 @@ public class FairCountCommand {
     }
 
     private static int modList(CommandContext<CommandSourceStack> context) {
-        List<String> mods = Config.getAllowedMods();
+        Map<String, List<String>> mods = Config.getAllowedMods();
         if (mods.isEmpty()) {
             context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.list.empty"), false);
         } else {
             context.getSource().sendSuccess(() -> Component.translatable("faircount.command.mod.list.header", mods.size()), false);
-            for (String mod : mods) {
-                context.getSource().sendSuccess(() -> Component.translatable("faircount.command.list.item", mod), false);
+            for (Map.Entry<String, List<String>> entry : mods.entrySet()) {
+                String modId = entry.getKey();
+                List<String> hashes = entry.getValue();
+                String info = hashes.isEmpty() ? "(all versions)" : "(" + hashes.size() + " hashes)";
+                context.getSource().sendSuccess(() -> Component.translatable("faircount.command.list.item", modId + " " + info), false);
             }
         }
         return 1;
@@ -182,6 +246,88 @@ public class FairCountCommand {
                 ServerPlayer onlinePlayer = context.getSource().getServer().getPlayerList().getPlayer(java.util.UUID.fromString(uuid));
                 String display = onlinePlayer != null ? onlinePlayer.getName().getString() + " (" + uuid + ")" : uuid;
                 context.getSource().sendSuccess(() -> Component.translatable("faircount.command.list.item", display), false);
+            }
+        }
+        return 1;
+    }
+
+    // ========== Resource Pack Commands ==========
+
+    private static int packAdd(CommandContext<CommandSourceStack> context) {
+        String packName = StringArgumentType.getString(context, "pack_name");
+        if (Config.addResourcePack(packName)) {
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.add.success", packName), true);
+            return 1;
+        } else {
+            context.getSource().sendFailure(Component.translatable("faircount.command.pack.add.fail", packName));
+            return 0;
+        }
+    }
+
+    private static int packAddWithHash(CommandContext<CommandSourceStack> context) {
+        String packName = StringArgumentType.getString(context, "pack_name");
+        String hash = StringArgumentType.getString(context, "sha256").toLowerCase();
+        if (Config.addResourcePack(packName, hash)) {
+            String shortHash = hash.substring(0, Math.min(8, hash.length())) + "...";
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.add_hash.success", packName, shortHash), true);
+            return 1;
+        } else {
+            context.getSource().sendFailure(Component.translatable("faircount.command.pack.add_hash.fail", packName));
+            return 0;
+        }
+    }
+
+    private static int packRemove(CommandContext<CommandSourceStack> context) {
+        String packName = StringArgumentType.getString(context, "pack_name");
+        if (Config.removeResourcePack(packName)) {
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.remove.success", packName), true);
+            return 1;
+        } else {
+            context.getSource().sendFailure(Component.translatable("faircount.command.pack.remove.fail", packName));
+            return 0;
+        }
+    }
+
+    private static int packRemoveWithHash(CommandContext<CommandSourceStack> context) {
+        String packName = StringArgumentType.getString(context, "pack_name");
+        String hash = StringArgumentType.getString(context, "sha256").toLowerCase();
+        if (Config.removeResourcePackHash(packName, hash)) {
+            String shortHash = hash.substring(0, Math.min(8, hash.length())) + "...";
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.remove_hash.success", packName, shortHash), true);
+            return 1;
+        } else {
+            context.getSource().sendFailure(Component.translatable("faircount.command.pack.remove_hash.fail", packName));
+            return 0;
+        }
+    }
+
+    private static int packAddAll(CommandContext<CommandSourceStack> context) {
+        int added = Config.addAllClientResourcePacks();
+        if (added > 0) {
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.add_all.success", added), true);
+        } else {
+            context.getSource().sendFailure(Component.translatable("faircount.command.pack.add_all.fail"));
+        }
+        return added > 0 ? added : 1;
+    }
+
+    private static int packRemoveAll(CommandContext<CommandSourceStack> context) {
+        int removed = Config.removeAllResourcePacks();
+        context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.remove_all.success", removed), true);
+        return 1;
+    }
+
+    private static int packList(CommandContext<CommandSourceStack> context) {
+        Map<String, List<String>> packs = Config.getAllowedResourcePacks();
+        if (packs.isEmpty()) {
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.list.empty"), false);
+        } else {
+            context.getSource().sendSuccess(() -> Component.translatable("faircount.command.pack.list.header", packs.size()), false);
+            for (Map.Entry<String, List<String>> entry : packs.entrySet()) {
+                String packName = entry.getKey();
+                List<String> hashes = entry.getValue();
+                String info = hashes.isEmpty() ? "§7(no hash)" : "§8(" + hashes.size() + " hash" + (hashes.size() > 1 ? "es" : "") + ")";
+                context.getSource().sendSuccess(() -> Component.translatable("faircount.command.list.item", packName + " " + info), false);
             }
         }
         return 1;

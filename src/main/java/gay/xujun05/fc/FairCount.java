@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import gay.xujun05.fc.networking.ModCheckPayload;
+import gay.xujun05.fc.networking.ModInfo;
+import gay.xujun05.fc.networking.ResourcePackInfo;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +26,8 @@ public class FairCount implements ModInitializer {
     public static final String MOD_ID = "faircount";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static final Set<UUID> VERIFIED_PLAYERS = new HashSet<>();
-    private static final Map<String, List<String>> CLIENT_MOD_LISTS = new HashMap<>();
+    private static final Map<String, List<ModInfo>> CLIENT_MOD_LISTS = new HashMap<>();
+    private static final Map<String, List<ResourcePackInfo>> CLIENT_RESOURCE_PACK_LISTS = new HashMap<>();
 
     @Override
     public void onInitialize() {
@@ -42,37 +45,94 @@ public class FairCount implements ModInitializer {
             int nested = payload.nestedCount();
 
             // Store client mod list for /faircount add all
-            CLIENT_MOD_LISTS.put(playerName, new ArrayList<>(payload.modIds()));
+            CLIENT_MOD_LISTS.put(playerName, new ArrayList<>(payload.mods()));
 
-            List<String> extraMods = new ArrayList<>(payload.modIds());
-            extraMods.removeAll(Config.getAllowedMods());
-            extraMods.removeIf(id -> id.startsWith("fabric-"));
+            // Store client resource pack list for /faircount pack add all
+            List<ResourcePackInfo> clientPacks = payload.resourcePacks() != null ? payload.resourcePacks() : List.of();
+            CLIENT_RESOURCE_PACK_LISTS.put(playerName, new ArrayList<>(clientPacks));
+
+            List<String> unallowedMods = new ArrayList<>();
+            List<String> mismatchedMods = new ArrayList<>();
+            List<String> unallowedPacks = new ArrayList<>();
+            List<String> mismatchedPacks = new ArrayList<>();
+
+            for (ModInfo mod : payload.mods()) {
+                String modId = mod.id();
+                if (modId.startsWith("fabric-")) {
+                    continue;
+                }
+
+                if (!Config.isModAllowed(modId)) {
+                    unallowedMods.add(modId);
+                } else if (!Config.isHashAllowed(modId, mod.sha256())) {
+                    mismatchedMods.add(modId);
+                    LOGGER.warn("[FairCount] Hash mismatch for mod '{}' from player {}. Received hash: '{}'", modId, playerName, mod.sha256());
+                }
+            }
+
+            for (ResourcePackInfo pack : clientPacks) {
+                String packName = pack.name();
+                if (!Config.isResourcePackAllowed(packName)) {
+                    unallowedPacks.add(packName);
+                } else if (!Config.isResourcePackHashAllowed(packName, pack.sha256())) {
+                    mismatchedPacks.add(packName);
+                    LOGGER.warn("[FairCount] Hash mismatch for resource pack '{}' from player {}. Received hash: '{}'", packName, playerName, pack.sha256());
+                }
+            }
 
             LOGGER.info("=========================================");
-            LOGGER.info("[FairCount] Mod inspection results for player [{}]", playerName);
+            LOGGER.info("[FairCount] Inspection results for player [{}]", playerName);
             LOGGER.info("[FairCount] Pure JARs: {} | Nested Mods: {}", pureJar, nested);
-            LOGGER.info("[FairCount] Unallowed mods: {}", extraMods.size());
+            LOGGER.info("[FairCount] Unallowed mods: {} | Hash mismatches: {}", unallowedMods.size(), mismatchedMods.size());
+            LOGGER.info("[FairCount] External Resource Packs: {} | Unallowed: {} | Hash mismatches: {}", clientPacks.size(), unallowedPacks.size(), mismatchedPacks.size());
 
             boolean isIgnored = Config.getIgnoredPlayers().contains(playerUuid.toString());
             boolean isOp = player.createCommandSourceStack().permissions().hasPermission(Permissions.COMMANDS_OWNER);
             boolean bypass = isIgnored || isOp;
 
-            if (extraMods.isEmpty() || bypass) {
+            boolean safe = (unallowedMods.isEmpty() && mismatchedMods.isEmpty() && unallowedPacks.isEmpty() && mismatchedPacks.isEmpty()) || bypass;
+
+            if (safe) {
                 if (bypass) {
-                    LOGGER.info("[FairCount] Player {} ({}) bypassed extra mod checks (Ignored: {}, OP: {}).", playerName, playerUuid, isIgnored, isOp);
+                    LOGGER.info("[FairCount] Player {} ({}) bypassed checks (Ignored: {}, OP: {}).", playerName, playerUuid, isIgnored, isOp);
                 } else {
-                    LOGGER.info("[FairCount] No extra mods detected. Safe.");
+                    LOGGER.info("[FairCount] No unauthorized mods or resource packs detected. Safe.");
                 }
                 VERIFIED_PLAYERS.add(playerUuid);
             } else {
-                LOGGER.warn("[FairCount] Detected unallowed mods: {}", extraMods);
+                if (!unallowedMods.isEmpty()) {
+                    LOGGER.warn("[FairCount] Detected unallowed mods: {}", unallowedMods);
+                }
+                if (!mismatchedMods.isEmpty()) {
+                    LOGGER.warn("[FairCount] Detected modified/spoofed mods (hash mismatch): {}", mismatchedMods);
+                }
+                if (!unallowedPacks.isEmpty()) {
+                    LOGGER.warn("[FairCount] Detected unallowed resource packs: {}", unallowedPacks);
+                }
+                if (!mismatchedPacks.isEmpty()) {
+                    LOGGER.warn("[FairCount] Detected modified/spoofed resource packs (hash mismatch): {}", mismatchedPacks);
+                }
 
                 LOGGER.info("=========================================");
 
                 server.execute(() -> {
-                    player.connection.disconnect(Component.translatable(
-                            "faircount.kick.unallowed_mods", extraMods.toString()
-                    ));
+                    if (!unallowedMods.isEmpty()) {
+                        player.connection.disconnect(Localization.getComponent(
+                                player, "faircount.kick.unallowed_mods", unallowedMods.toString()
+                        ));
+                    } else if (!mismatchedMods.isEmpty()) {
+                        player.connection.disconnect(Localization.getComponent(
+                                player, "faircount.kick.hash_mismatch", mismatchedMods.toString()
+                        ));
+                    } else if (!unallowedPacks.isEmpty()) {
+                        player.connection.disconnect(Localization.getComponent(
+                                player, "faircount.kick.unallowed_resource_pack", unallowedPacks.toString()
+                        ));
+                    } else {
+                        player.connection.disconnect(Localization.getComponent(
+                                player, "faircount.kick.resource_pack_hash_mismatch", mismatchedPacks.toString()
+                        ));
+                    }
                 });
                 return;
             }
@@ -101,8 +161,8 @@ public class FairCount implements ModInitializer {
                             LOGGER.info("[FairCount] Player {} ({}) bypassed timeout kick (Ignored: {}, OP: {}).", playerName, playerUuid, isIgnored, isOp);
                             return;
                         }
-                        player.connection.disconnect(Component.translatable(
-                                "faircount.kick.missing_mod"
+                        player.connection.disconnect(Localization.getComponent(
+                                player, "faircount.kick.missing_mod"
                         ));
                         LOGGER.info("=========================================");
                         LOGGER.warn("[FairCount] Player {} was kicked for not sending the packet, assuming mod is not installed.", playerName);
@@ -115,6 +175,7 @@ public class FairCount implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             VERIFIED_PLAYERS.remove(handler.getPlayer().getUUID());
             CLIENT_MOD_LISTS.remove(handler.getPlayer().getName().getString());
+            CLIENT_RESOURCE_PACK_LISTS.remove(handler.getPlayer().getName().getString());
         });
     }
 
@@ -122,7 +183,11 @@ public class FairCount implements ModInitializer {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    public static Map<String, List<String>> getClientModLists() {
+    public static Map<String, List<ModInfo>> getClientModLists() {
         return CLIENT_MOD_LISTS;
+    }
+
+    public static Map<String, List<ResourcePackInfo>> getClientResourcePackLists() {
+        return CLIENT_RESOURCE_PACK_LISTS;
     }
 }

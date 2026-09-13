@@ -13,11 +13,13 @@ public class FairCountClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             ModCounter activeCounter = new ModCounter();
+            ResourcePackCounter packCounter = new ResourcePackCounter();
 
             ModCheckPayload packet = new ModCheckPayload(
                     activeCounter.getPureJarCount(),
                     activeCounter.getNestedModCount(),
-                    activeCounter.getDetectedModIds()
+                    activeCounter.getDetectedMods(),
+                    packCounter.getDetectedExternalPacks()
             );
 
             ClientPlayNetworking.send(packet);

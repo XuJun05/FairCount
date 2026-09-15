@@ -46,31 +46,37 @@ public class ResourcePackCounter {
         Path resourcePackDir = client.getResourcePackDirectory();
 
         for (Pack pack : repository.getSelectedPacks()) {
-            String id = pack.getId();
+            try {
+                String id = pack.getId();
 
-            // Ignore built-in vanilla, feature, and mod internal packs
-            if (isBuiltInPack(pack, id)) {
-                continue;
+                if (!id.startsWith("file/")) {
+                    continue;
+                }
+
+                if (isBuiltInPack(pack, id)) {
+                    continue;
+                }
+
+                String packFileName = id.substring(5);
+                Path packPath = resourcePackDir != null ? resourcePackDir.resolve(packFileName) : null;
+
+                if (packPath == null || !Files.exists(packPath)) {
+                    continue;
+                }
+
+                String sha256 = "";
+                if (Files.isRegularFile(packPath)) {
+                    sha256 = calculateFileSha256(packPath);
+                } else if (Files.isDirectory(packPath)) {
+                    sha256 = calculateDirectorySha256(packPath);
+                }
+
+                String displayName = pack.getTitle() != null ? pack.getTitle().getString() : packFileName;
+                detectedExternalPacks.add(new ResourcePackInfo(packFileName, displayName, sha256));
+                System.out.println("[FairCount] Detected external resource pack: " + packFileName + " (hash: " + sha256 + ")");
+            } catch (Throwable t) {
+                System.err.println("[FairCount] Error processing resource pack: " + t.getMessage());
             }
-
-            String packFileName = id.startsWith("file/") ? id.substring(5) : id;
-            Path packPath = resourcePackDir != null ? resourcePackDir.resolve(packFileName) : null;
-
-            // If the pack file doesn't exist in resourcepacks directory, consider it an internal/virtual pack
-            if (packPath == null || !Files.exists(packPath)) {
-                continue;
-            }
-
-            String sha256 = "";
-            if (Files.isRegularFile(packPath)) {
-                sha256 = calculateFileSha256(packPath);
-            } else if (Files.isDirectory(packPath)) {
-                sha256 = calculateDirectorySha256(packPath);
-            }
-
-            String displayName = pack.getTitle() != null ? pack.getTitle().getString() : packFileName;
-            detectedExternalPacks.add(new ResourcePackInfo(packFileName, displayName, sha256));
-            System.out.println("[FairCount] Detected external resource pack: " + packFileName + " (hash: " + sha256 + ")");
         }
     }
 
